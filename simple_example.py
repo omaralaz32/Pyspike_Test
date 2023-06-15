@@ -6,8 +6,8 @@ from pyspike.isi_lengths import default_thresh
 from pyspike import SpikeTrain
 
 
-measures   =  15   # +1:ISI,+2:SPIKE,+4:RI-SPIKE,+8:SPIKE-Synchro,
-a_measures =  15   # +1:A-ISI,+2:A-SPIKE,+4:A-RI-SPIKE,+8:A-SPIKE-Synchro
+measures   =  8   # +1:ISI,+2:SPIKE,+4:RI-SPIKE,+8:SPIKE-Synchro,
+a_measures =  0   # +1:A-ISI,+2:A-SPIKE,+4:A-RI-SPIKE,+8:A-SPIKE-Synchro
 showing =      2   # +1:spike trains,+2:distances,+4:profiles,+8:matrices
 plotting =     0   # +1:spike trains,+2:distances,+4:profiles,+8:matrices
 
