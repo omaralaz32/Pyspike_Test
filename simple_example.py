@@ -4,39 +4,50 @@ from numpy import *
 from pylab import *
 from pyspike.isi_lengths import default_thresh
 from pyspike import SpikeTrain
+from matplotlib import pyplot
+from pyspike import spike_directionality
 
-
-measures   =  8   # +1:ISI,+2:SPIKE,+4:RI-SPIKE,+8:SPIKE-Synchro,
-a_measures =  0   # +1:A-ISI,+2:A-SPIKE,+4:A-RI-SPIKE,+8:A-SPIKE-Synchro
-showing =      2   # +1:spike trains,+2:distances,+4:profiles,+8:matrices
-plotting =     0   # +1:spike trains,+2:distances,+4:profiles,+8:matrices
+measures   =  16   # +1:ISI,+2:SPIKE,+4:RI-SPIKE,+8:SPIKE-Synchro,+16:SpikeOrder
+a_measures =  0   # +1:A-ISI,+32:A-SPIKE,+64:A-RI-SPIKE,+128:A-SPIKE-Synchro
+showing =      15   # +1:spike trains,+2:distances,+4:profiles,+8:matrices
+plotting =     15   # +1:spike trains,+2:distances,+4:profiles,+8:matrices
+sorting =       1   # 0: Unsorted order; 1: Sorted order
 
 tmin=0;
 tmax=1000;
 threshold=1000;
 
-dataset=2;     # choose one of the four main examples used so far, the parameter is just the different number of spike trains of this examples (2, 4, 6, 40)
+dataset=5;     # choose one of the four main examples used so far, the parameter is just the different number of spike trains of this examples (2, 4, 6, 40)
+print("\n\n\ndataset: %3i" % (dataset))
 
 if dataset == 2:
-    tmax=30;
+    tmax=100;
     spike_trains = []
     spike_trains.append(spk.SpikeTrain([12, 16, 28, 32, 44, 48, 60, 64, 76, 80], [tmin, tmax]))
     spike_trains.append(spk.SpikeTrain([8, 20, 24, 36, 40, 52, 56, 68, 72, 84], [tmin, tmax]))
+elif dataset == 3:
+    tmax=10
+    spike_trains = []
+    spike_trains.append(spk.SpikeTrain([0, 1, 5, 8, 10], [tmin, tmax]))
+    spike_trains.append(spk.SpikeTrain([0, 3, 7, 10], [tmin, tmax]))
 else:
     if dataset == 4:
         tmax=1000;
         spike_trains = spk.load_spike_trains_from_txt("./examples/PySpike_testdata4.txt", edges=(tmin, tmax))
     else:
-        if dataset == 6:
-            tmax=1000;
-            spike_trains = spk.load_spike_trains_from_txt("./examples/PySpike_testdata6.txt", edges=(tmin, tmax))
-            spike_trains[3]=spk.SpikeTrain([], [spike_trains[0].t_start, spike_trains[0].t_end])
-            spike_trains[4]=spk.SpikeTrain([], [spike_trains[0].t_start, spike_trains[0].t_end])
+        if dataset == 5:
+            tmax=1
+            spike_trains = spk.load_spike_trains_from_txt("./examples/PySpike_testdata5.txt", edges=(tmin, tmax))
         else:
-            if dataset == 40:
-                showing=8;
-                tmax=4000;
-                spike_trains = spk.load_spike_trains_from_txt("./examples/PySpike_testdata.txt", edges=(tmin, tmax))
+            if dataset == 6:
+                tmax=1000;
+                spike_trains = spk.load_spike_trains_from_txt("./examples/PySpike_testdata6.txt", edges=(tmin, tmax))
+                spike_trains[3]=spk.SpikeTrain([], [spike_trains[0].t_start, spike_trains[0].t_end])
+                spike_trains[4]=spk.SpikeTrain([], [spike_trains[0].t_start, spike_trains[0].t_end])
+            else:
+                if dataset == 40:
+                    tmax=4000;
+                    spike_trains = spk.load_spike_trains_from_txt("./examples/PySpike_testdata.txt", edges=(tmin, tmax))
     
 num_trains = len (spike_trains);
 print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nnum_trains: %3i" % (num_trains))
@@ -182,12 +193,12 @@ if measures % 4 > 1:                                                    # SPIKE-
 
 if measures % 8 > 3:                                                    # RI-SPIKE-distance
     if showing % 16 > 1 or plotting % 16 > 1:
-        ri_spike_distance = spk.spike_distance(spike_trains, RIA=True)
+        ri_spike_distance = spk.spike_distance(spike_trains, RI=True)
         if showing % 4 > 1:
             print("\nRI-SPIKE-Distance: %.8f\n" % ri_spike_distance)
       
     if showing % 8 > 3 or plotting % 8 > 3:
-        ri_spike_profile = spk.spike_profile(spike_trains, RIA=True)
+        ri_spike_profile = spk.spike_profile(spike_trains, RI=True)
         x, y = ri_spike_profile.get_plottable_data()
 
         if showing % 8 > 3:
@@ -214,7 +225,7 @@ if measures % 8 > 3:                                                    # RI-SPI
             plt.ylabel('RI-SPIKE', color='k', fontsize=18)
 
     if showing % 16 > 7 or plotting % 16 > 7:
-        ri_spike_distance_mat = spk.spike_distance_matrix(spike_trains, RIA=True)
+        ri_spike_distance_mat = spk.spike_distance_matrix(spike_trains, RI=True)
         if showing % 16 > 7:
             print("\nRI-SPIKE-Distance-Matrix:")
             for i in arange (num_trains):
@@ -290,9 +301,79 @@ if measures % 16 > 7:                                                    # SPIKE
             plt.jet()
             plt.colorbar()
 
+if  measures % 32 > 15:                                                   #SPIKE ORDER
+     if showing % 16 > 1 or plotting % 16 > 1:
+        spike_order = spk.spike_train_order(spike_trains)
+        if showing % 4 > 1:
+            print("\nSPIKE-Order: %.8f\n" % spike_order)
 
+     if showing % 8 > 3 or plotting % 8 > 3:
+        spike_order_profile = spk.spike_train_order_profile(spike_trains)
+        x, y = spike_order_profile.get_plottable_data()
 
+        if showing % 8 > 3:
+            num_xy = len (x);
+            print("\nSPIKE-Order-Profile:\n")
+            print("x            y\n")
+            for i in arange (num_xy):
+                print("%.8f   %.8f\n" % (x[i], y[i]), end = "")
+            print("\n")
 
+        if plotting % 8 > 3:
+            plt.figure(figsize=(17, 10), dpi=80)
+            plt.plot(x, y, '-k')
+            plt.axis([tmin-0.05*(tmax-tmin), tmax+0.05*(tmax-tmin), -1.05, 1.05])
+            plt.plot((tmin, tmax), (0, 0), ':', color='k', linewidth=1)
+            plt.plot((tmin, tmax), (1, 1), ':', color='k', linewidth=1)
+            plt.plot((tmin, tmin), (0, 1), ':', color='k', linewidth=1)
+            plt.plot((tmax, tmax), (0, 1), ':', color='k', linewidth=1)
+            plt.plot((tmin, tmax), (spike_order, spike_order), '--', color='k', linewidth=1)
+            plt.xticks(fontsize=12)
+            plt.yticks(fontsize=12) # rotation=90
+            plt.title("SPIKE-Order-profile   (SPIKE-Order = %.8f)" % (spike_order), color='k', fontsize=24)
+            plt.xlabel('Time', color='k', fontsize=18)
+            plt.ylabel('SPIKE-Order', color='k', fontsize=18)
+
+     if showing % 16 > 7 or plotting % 16 > 7:
+        spike_order_mat = spk.spike_directionality_matrix(spike_trains)
+        if showing % 8 > 3:
+            print("\nSPIKE-Order-Matrix:")
+            for i in arange (num_trains):
+                print("\n%i     " % (i+1), end = "")
+                for j in arange (num_trains):
+                    print("%.8f " % (spike_order_mat[i][j]), end = "")
+            print("\n")
+
+        if plotting % 16 > 7:
+            plt.figure(figsize=(17, 10), dpi=80)
+            plt.imshow(spike_order_mat, interpolation='none')
+            plt.title("SPIKE-Order-matrix   (SPIKE-Order = %.8f)" % (spike_order), color='k', fontsize=24)
+            plt.xlabel('Spike Trains', color='k', fontsize=18)
+            plt.ylabel('Spike Trains', color='k', fontsize=18)
+            plt.xticks(arange(num_trains),arange(num_trains)+1, fontsize=14)
+            plt.yticks(arange(num_trains),arange(num_trains)+1, fontsize=14)
+            plt.jet()
+            plt.colorbar()
+
+if sorting % 2 > 0:                                                       #Sorting
+    D_init = spk.spike_directionality_matrix(spike_trains)
+    phi, _ = spk.optimal_spike_train_sorting(spike_trains)
+    F_opt = spk.spike_train_order(spike_trains, indices=phi)
+    print("Synfire Indicator of optimized spike train sorting:", F_opt)
+
+    D_opt = spk.permutate_matrix(D_init, phi)
+
+    plt.figure()
+    plt.imshow(D_init)
+    plt.title("Initial Directionality Matrix")
+
+    plt.figure()
+    plt.imshow(D_opt)
+    plt.title("Optimized Directionality Matrix")
+
+    plt.show()
+
+    
 if a_measures % 2 > 0:                                                    # A-ISI-distance
     if showing % 16 > 1 or plotting % 16 > 1:
         #adaptive_isi_distance_thr_0 = spk.isi_distance(spike_trains, MRTS=0)        # falls back to original ISI-distance
@@ -432,14 +513,14 @@ if a_measures % 4 > 1:                                                    # A-SP
 
 if a_measures % 8 > 3:                                                    # A-RI-SPIKE-distance
     if showing % 16 > 1 or plotting % 16 > 1:
-        adaptive_ri_spike_distance_thr = spk.spike_distance(spike_trains, MRTS=threshold, RIA=True)
-        adaptive_ri_spike_distance_auto = spk.spike_distance(spike_trains, MRTS='auto', RIA=True)        
+        adaptive_ri_spike_distance_thr = spk.spike_distance(spike_trains, MRTS=threshold, RI=True)
+        adaptive_ri_spike_distance_auto = spk.spike_distance(spike_trains, MRTS='auto', RI=True)        
         if showing % 4 > 1:
             print("\nA-RI-SPIKE-Distance-Thr: %.8f\n" % adaptive_ri_spike_distance_thr)
             print("\nA-RI-SPIKE-Distance-Auto: %.8f\n" % adaptive_ri_spike_distance_auto)
       
     if showing % 8 > 3 or plotting % 8 > 3:
-        adaptive_ri_spike_profile = spk.spike_profile(spike_trains, MRTS=threshold, RIA=True)
+        adaptive_ri_spike_profile = spk.spike_profile(spike_trains, MRTS=threshold, RI=True)
         x, y = adaptive_ri_spike_profile.get_plottable_data()
 
         if showing % 8 > 3:
@@ -466,7 +547,7 @@ if a_measures % 8 > 3:                                                    # A-RI
             plt.ylabel('A-RI-SPIKE', color='k', fontsize=18)
 
     if showing % 16 > 7 or plotting % 16 > 7:
-        adaptive_ri_spike_distance_mat = spk.spike_distance_matrix(spike_trains, MRTS=threshold, RIA=True)
+        adaptive_ri_spike_distance_mat = spk.spike_distance_matrix(spike_trains, MRTS=threshold, RI=True)
         if showing % 16 > 7:
             print("\nA-RI-SPIKE-Distance-Matrix:")
             for i in arange (num_trains):
@@ -547,6 +628,7 @@ if a_measures % 16 > 7:                                                    # A-S
 
 if plotting > 0:
     plt.show()
+
 
 
 
