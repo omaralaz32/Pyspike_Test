@@ -28,7 +28,7 @@ spike_trains = spk.load_spike_trains_from_txt("./examples/PySpike_testdata5.txt"
 print(f_all_trains(spike_trains))
 
 all_trains = f_all_trains(spike_trains)
-def spike_order_profile(spike_trains, all_trains):
+def ss_profile(spike_trains, all_trains):
     num_trains = len(spike_trains)
     st = [len(train) for train in spike_trains]
     ss = np.zeros((num_trains, len(all_trains)))
@@ -45,7 +45,7 @@ def spike_order_profile(spike_trains, all_trains):
         
     return ss
 
-print(spike_order_profile(spike_trains, all_trains))
+print(ss_profile(spike_trains, all_trains))
 def find_coincidences(spike_train1, spike_train2):
     C = []
     for i in range(len(spike_train1)):
